@@ -62,7 +62,7 @@ FUNCTIONS: BATTERY BANKS
 def get_Bank_Readings():
     global BANK_A_VALUES, BANK_B_VALUES, BANK_A_EXCEPTION, BANK_B_EXCEPTION, GLOBAL_BATTERY_ERROR, BANK_COUNTER
     if(BANK_COUNTER <= 100):
-        BANK_COUNTER++
+        BANK_COUNTER = BANK_COUNTER + 1
         if check_Bank_Existing_Values("A") and check_Bank_Existing_Values("B"):
             return combine_Bank_Readings(BANK_A_VALUES, BANK_B_VALUES)
         else
