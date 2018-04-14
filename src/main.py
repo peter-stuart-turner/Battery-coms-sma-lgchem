@@ -32,7 +32,7 @@ RELAY_PIN = 4
 
 # Battery Related Globals #
 BATTERY_VALUES = None
-
+ALERT_MODE_COUNTER = 0
 IS_GRIDFEEDING = None
 LOWER_SOC = 0.1
 UPPER_SOC = 0.9
@@ -133,10 +133,18 @@ def enter_state_4():
     '''
     close_Contactor()
     set_Charge_Current(0)
+def alert_mode():
+    close_Contactor()
+    set_Charge_Current(50)
 
 def enter_reset():
     print "Resetting..."
-
+def check_Battery_Values():
+    global BATTERY_VALUES
+    if len(BATTERY_VALUES) == 4:
+        ALERT_MODE_COUNTER = 0
+    else:
+        ALERT_MODE_COUNTER = ALERT_MODE_COUNTER + 1
 def initialize():
     print("Initializing...")
     GPIO.setmode(GPIO.BCM)
@@ -157,23 +165,27 @@ initialize()
 # Main Loop #
 while RUNNING:
     time.sleep(0.5)
+    try:
+        BATTERY_VALUES = modbus.get_Bank_Readings()
+        errorMessage = modbus.generate_Error_Message()
+        check_Battery_Values()
+    if(ALERT_MODE_COUNTER > 10):
+        print("--------------------------------------")
+        alert_mode()
+    else:
+        print("SOC: {}".format(BATTERY_VALUES["SOC"]))
+        print("SOH: {}".format(BATTERY_VALUES["SOH"]))
+        print("Battery Current: {}".format(BATTERY_VALUES["Current"]))
+        print("Battery Current Limit: {}".format(BATTERY_VALUES["Current_Limit"]))
+        print("Gridfeeding History: {}".format(modbus.PREVIOUS_VALS))
+        print("Is Gridfeeding? {}".format(modbus.IS_GRID_FEEDING))
+        print("Errors: \n")
+        print(errorMessage)
 
-    BATTERY_VALUES = modbus.get_Bank_Readings()
-    errorMessage = modbus.generate_Error_Message()
-
-    print("SOC: {}".format(BATTERY_VALUES["SOC"]))
-    print("SOH: {}".format(BATTERY_VALUES["SOH"]))
-    print("Battery Current: {}".format(BATTERY_VALUES["Current"]))
-    print("Battery Current Limit: {}".format(BATTERY_VALUES["Current_Limit"]))
-    print("Gridfeeding History: {}".format(modbus.PREVIOUS_VALS))
-    print("Is Gridfeeding? {}".format(modbus.IS_GRID_FEEDING))
-    print("Errors: \n")
-    print(errorMessage)
-
-    print("--------------------------------------")
-    print("Determining State...")
-    print("--------------------------------------")
-    _, IS_GRIDFEEDING = get_State_Variables()
-    NEXT_STATE = determine_Next_State(combinedBankReadings["SOC"])
-    CURRENT_STATE = change_State(CURRENT_STATE, NEXT_STATE)
-    print("--------------------------------------")
+        print("--------------------------------------")
+        print("Determining State...")
+        print("--------------------------------------")
+        _, IS_GRIDFEEDING = get_State_Variables()
+        NEXT_STATE = determine_Next_State(combinedBankReadings["SOC"])
+        CURRENT_STATE = change_State(CURRENT_STATE, NEXT_STATE)
+        print("--------------------------------------")
