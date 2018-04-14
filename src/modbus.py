@@ -65,7 +65,6 @@ def get_Bank_Readings():
         BANK_COUNTER = BANK_COUNTER + 1
         if check_Bank_Existing_Values("A") and check_Bank_Existing_Values("B"):
             return combine_Bank_Readings(BANK_A_VALUES, BANK_B_VALUES)
-        else
 
     else:
         BANK_COUNTER = 0
