@@ -32,6 +32,13 @@ RELAY_PIN = 4
 
 # Battery Related Globals #
 BATTERY_VALUES = None
+DEFAULT_VALUES = {
+                "Current":          50,
+                "Current_Limit":    100,
+                "SOC":              80,
+                "SOH":              90
+            	}
+
 ALERT_MODE_COUNTER = 0
 IS_GRIDFEEDING = None
 LOWER_SOC = 0.1
@@ -133,7 +140,9 @@ def enter_state_4():
     '''
     close_Contactor()
     set_Charge_Current(0)
+
 def alert_mode():
+    print("ENTERING INTO ALERT MODE")
     close_Contactor()
     set_Charge_Current(50)
 
@@ -141,9 +150,9 @@ def enter_reset():
     print "Resetting..."
 def check_Battery_Values():
     global BATTERY_VALUES
-    if len(BATTERY_VALUES) == 4:
+    if len(BATTERY_VALUES) == 4 and BATTERY_VALUES is not "ALERTMODE":
         ALERT_MODE_COUNTER = 0
-    else:
+    elif BATTERY_VALUES == "ALERTMODE":
         ALERT_MODE_COUNTER = ALERT_MODE_COUNTER + 1
 def initialize():
     print("Initializing...")
@@ -167,9 +176,16 @@ while RUNNING:
     time.sleep(0.5)
     try:
         BATTERY_VALUES = modbus.get_Bank_Readings()
+	DEFAULT_VALUES = BATTERY_VALUES
         errorMessage = modbus.generate_Error_Message()
         check_Battery_Values()
-    if(ALERT_MODE_COUNTER > 10):
+    except:
+	pass
+    if ALERT_MODE_COUNTER > 0:
+	print("Heading towards alert mode...counter is:")
+	print(ALERT_MODE_COUNTER)
+	BATTERY_VALUES = DEFAULT_VALUES
+    if ALERT_MODE_COUNTER > 10:
         print("--------------------------------------")
         alert_mode()
     else:
@@ -186,6 +202,6 @@ while RUNNING:
         print("Determining State...")
         print("--------------------------------------")
         _, IS_GRIDFEEDING = get_State_Variables()
-        NEXT_STATE = determine_Next_State(combinedBankReadings["SOC"])
+        NEXT_STATE = determine_Next_State(BATTERY_VALUES["SOC"])
         CURRENT_STATE = change_State(CURRENT_STATE, NEXT_STATE)
         print("--------------------------------------")

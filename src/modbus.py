@@ -72,8 +72,8 @@ def get_Bank_Readings():
         elif bValues and not aValues:
             return combine_Bank_Readings(BANK_B_VALUES, BANK_B_VALUES)
         else:
-            print("No Battery Banks Connected, or there are errors for both - exiting program")
-            exit()
+            print("No Battery Banks Connected, or there are errors for both")
+	    return "ALERTMODE"
     else:
         BANK_COUNTER = 0
         aStable = get_Bank_A_Readings()
@@ -85,11 +85,11 @@ def get_Bank_Readings():
             return combine_Bank_Readings(BANK_A_VALUES, BANK_B_VALUES)
         elif ( aStable and not bStable ):
             BANK_A_EXCEPTION = None
-            GLOBAL_BATTERY_ERROR = "Error with bank B: " + BANK_B_EXCEPTION
+            GLOBAL_BATTERY_ERROR = "Error with bank B: " + str(BANK_B_EXCEPTION)
             return combine_Bank_Readings(BANK_A_VALUES,BANK_A_VALUES)
         elif ( bStable and not aStable ):
             BANK_B_EXCEPTION = None
-            GLOBAL_BATTERY_ERROR = "Error with bank A: " + BANK_A_EXCEPTION
+            GLOBAL_BATTERY_ERROR = "Error with bank A: " + str(BANK_A_EXCEPTION)
             return combine_Bank_Readings(BANK_B_VALUES,BANK_B_VALUES)
         else:
             GLOBAL_BATTERY_ERROR = "Errors with both battery banks"
@@ -121,7 +121,7 @@ def combine_Bank_Readings(bankA, bankB):
             "SOC":              soc,
             "SOH":              soh
             }
-    print("Bank Values", BANK_VALUES)
+    #print("Bank Values", BANK_VALUES)
     return BANK_VALUES
 # Retrieves all relevant battery settings for A, returns false on error
 def get_Bank_A_Readings():
@@ -198,17 +198,17 @@ def get_Average_Reactive_Power():
         return reactive
     except Exception as ee:
         return False
-        GLOBAL_ENERGY_METER_ERROR = "Energy Meter Error: " + ee;
+        GLOBAL_ENERGY_METER_ERROR = "Energy Meter Error: " + str(ee);
 
 
 # Main Functions #
 def is_Gridfeeding():
     global IS_GRID_FEEDING, LENGTH, PREVIOUS_VALS, ENERGY_COUNTER
     temp_gf = False
-    reativePower = get_Average_Reactive_Power()
-    if(reativePower):
+    reactivePower = get_Average_Reactive_Power()
+    if(reactivePower):
     	length = len(PREVIOUS_VALS)
-    	if(reativePower > 1000):
+    	if(reactivePower > 1000):
             temp_gf = True
     	if length < LENGTH:
             PREVIOUS_VALS.append(temp_gf)
@@ -221,9 +221,9 @@ def is_Gridfeeding():
             if not(PREVIOUS_VALS[ii]):
                 ENERGY_COUNTER = ENERGY_COUNTER + 1
 
-	    threshold = ceiling( 0.7 * LENGTH )
+	threshold = ceiling( 0.7 * LENGTH )
         valuesForGridfeed = LENGTH - ENERGY_COUNTER
-        if valuesForGridfeed < threshold:
+        if valuesForGridfeed > threshold:
             gf = True
         else:
             gf = False
