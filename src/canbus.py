@@ -17,22 +17,22 @@ FUNCTIONS
 def send_Buffer_To_Inverter(buffer):
     if uno.inWaiting()>0:
         uno.write(buffer)
-def set_Battery_Charge_Current(ChargeCurrent):
-    send_Buffer_To_Inverter(create_Buffer_To_Send_Over_CAN(0x351, ChargeCurrent))
-    send_Buffer_To_Inverter(create_Buffer_To_Send_Over_CAN(0x355, ChargeCurrent))
+def set_Battery_Charge_Current(batteryValues):
+    send_Buffer_To_Inverter(create_Buffer_To_Send_Over_CAN(0x351, batteryValues))
+    send_Buffer_To_Inverter(create_Buffer_To_Send_Over_CAN(0x355, batteryValues))
 # Create a buffer of instantaneous battery bank values, to send to inverter over CANBUS #
-def create_Buffer_To_Send_Over_CAN(InverterAddress, ChargeCurrent):
+def create_Buffer_To_Send_Over_CAN(InverterAddress, batteryValues):
     sendBuffer = []
     if InverterAddress == 0x351:
         sendBuffer.append(1)
         sendBuffer.append(constants.CONST_BAT_CHARGE_VOLTAGE)
-        sendBuffer.append(ChargeCurrent)
+        sendBuffer.append(batteryValues["Current"])
         sendBuffer.append(constants.CONST_BAT_DCHRG_CURR_LIM)
         sendBuffer.append(constants.CONST_BAT_DISCHARGE_VOLTAGE)
     elif InverterAddress == 0x355:
         sendBuffer.append(5)
-        sendBuffer.append(modbus.get_Average_SOC())
-        sendBuffer.append(modbus.get_Average_SOH())
+        sendBuffer.append(batteryValues["SOC"])
+        sendBuffer.append(batteryValues["SOH"])
     else:
         sendBuffer.append(0)
 

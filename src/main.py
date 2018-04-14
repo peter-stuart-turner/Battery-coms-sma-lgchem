@@ -31,9 +31,8 @@ GLOBAL VARIABLES
 RELAY_PIN = 4
 
 # Battery Related Globals #
-BATTERY_SOC = None
-BATTERY_SOH = None
-BATTERY_CHARGE_CURRENT_LIMIT = 0
+BATTERY_VALUES = None
+
 IS_GRIDFEEDING = None
 LOWER_SOC = 0.1
 UPPER_SOC = 0.9
@@ -81,7 +80,7 @@ def open_Contactor():
     GPIO.output(RELAY_PIN, False)
 
 def set_Charge_Current(charge_current):
-    canbus.set_Battery_Charge_Current(charge_current)
+    canbus.set_Battery_Charge_Current(BATTERY_VALUES)
     print("Charge current set to: {}".format(charge_current))
 '''
 STATE FUNCTIONS
@@ -159,13 +158,13 @@ initialize()
 while RUNNING:
     time.sleep(0.5)
 
-    combinedBankReadings = modbus.get_Bank_Readings()
+    BATTERY_VALUES = modbus.get_Bank_Readings()
     errorMessage = modbus.generate_Error_Message()
 
-    print("SOC: {}".format(combinedBankReadings["SOC"]))
-    print("SOH: {}".format(combinedBankReadings["SOH"]))
-    print("Battery Current: {}".format(combinedBankReadings["Current"]))
-    print("Battery Current Limit: {}".format(combinedBankReadings["Current_Limit"]))
+    print("SOC: {}".format(BATTERY_VALUES["SOC"]))
+    print("SOH: {}".format(BATTERY_VALUES["SOH"]))
+    print("Battery Current: {}".format(BATTERY_VALUES["Current"]))
+    print("Battery Current Limit: {}".format(BATTERY_VALUES["Current_Limit"]))
     print("Gridfeeding History: {}".format(modbus.PREVIOUS_VALS))
     print("Is Gridfeeding? {}".format(modbus.IS_GRID_FEEDING))
     print("Errors: \n")

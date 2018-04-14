@@ -72,7 +72,7 @@ def get_Bank_Readings():
         elif bValues and not aValues:
             return combine_Bank_Readings(BANK_B_VALUES, BANK_B_VALUES)
         else:
-            print("No Battery Banks Connected, or there are errors for both")
+            print("No Battery Banks Connected, or there are errors for both - exiting program")
             exit()
     else:
         BANK_COUNTER = 0
