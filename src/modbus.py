@@ -28,15 +28,15 @@ Instrument Stored Values (To use), and Counter
 # Battery banks ( Format: Current, Current Limit, SOC, SOH)
 BANK_A_VALUES = {}
 BANK_B_VALUES = {}
-BANK_A_EXCEPTION
-BANK_B_EXCEPTION
+BANK_A_EXCEPTION = None
+BANK_B_EXCEPTION = None
 BANK_COUNTER = 0
 '''
 Instrument Declarations (Note: Ports are not constant)
 '''
-ENERGY_METER = minimalmodbus.Instrument('/dev/ttyUSB0', 1)
-BATTERY_BANK_A = minimalmodbus.Instrument('/dev/ttyUSB1', 1)
-#BATTERY_BANK_B = minimalmodbus.Instrument('/dev/ttyUSB2', 1)
+ENERGY_METER = minimalmodbus.Instrument('/dev/ttyUSB1', 1)
+BATTERY_BANK_A = minimalmodbus.Instrument('/dev/ttyUSB0', 1)
+BATTERY_BANK_B = minimalmodbus.Instrument('/dev/ttyUSB2', 1)
 '''
 Instrument Settings for Minimal Modbus Library
 '''
@@ -88,7 +88,8 @@ def get_Bank_Readings():
 def initialize_Bank_Readings():
     aStable = get_Bank_A_Readings()
     bStable = get_Bank_B_Readings()
-
+    print("Bank A Stable: {}".format(aStable))
+    print("Bank B Stable: {}".format(bStable))
 def check_Bank_Existing_Values(bank):
     global BANK_A_VALUES, BANK_B_VALUES
     if bank == "A":
@@ -112,6 +113,7 @@ def combine_Bank_Readings(bankA, bankB):
             "SOC":              soc,
             "SOH":              soh
             }
+    print("Bank Values", BANK_VALUES)
     return BANK_VALUES
 # Retrieves all relevant battery settings for A, returns false on error
 def get_Bank_A_Readings():
@@ -215,7 +217,7 @@ def is_Gridfeeding():
         else:
             gf = False
 
-	    if length == 0:
+	if length == 0:
             IS_GRID_FEEDING = False
     	else:
     	    IS_GRID_FEEDING = gf

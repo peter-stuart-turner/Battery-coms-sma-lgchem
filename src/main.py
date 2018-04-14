@@ -139,6 +139,7 @@ def enter_reset():
     print "Resetting..."
 
 def initialize():
+    print("Initializing...")
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(RELAY_PIN, GPIO.OUT)
 
