@@ -63,9 +63,17 @@ def get_Bank_Readings():
     global BANK_A_VALUES, BANK_B_VALUES, BANK_A_EXCEPTION, BANK_B_EXCEPTION, GLOBAL_BATTERY_ERROR, BANK_COUNTER
     if(BANK_COUNTER <= 100):
         BANK_COUNTER = BANK_COUNTER + 1
-        if check_Bank_Existing_Values("A") and check_Bank_Existing_Values("B"):
+        aValues = check_Bank_Existing_Values("A")
+        bValues = check_Bank_Existing_Values("B")
+        if aValues and bValues:
             return combine_Bank_Readings(BANK_A_VALUES, BANK_B_VALUES)
-
+        else if aValues and not bValues:
+            return combine_Bank_Readings(BANK_A_VALUES, BANK_A_VALUES)
+        else if bValues and not aValues:
+            return combine_Bank_Readings(BANK_B_VALUES, BANK_B_VALUES)
+        else:
+            print("No Battery Banks Connected, or there are errors for both")
+            exit()
     else:
         BANK_COUNTER = 0
         aStable = get_Bank_A_Readings()
