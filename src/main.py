@@ -138,30 +138,42 @@ def enter_state_4():
 def enter_reset():
     print "Resetting..."
 
+def initialize():
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(RELAY_PIN, GPIO.OUT)
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(RELAY_PIN, GPIO.OUT)
+    is_grid_feeding_timer = Timer(modbus.PERIOD, modbus.is_Gridfeeding)
 
-is_grid_feeding_timer = Timer(modbus.PERIOD, modbus.is_Gridfeeding)
+    is_grid_feeding_timer.start()
 
-is_grid_feeding_timer.start()
+    modbus.initialize_Bank_Readings()
+'''
+Main Program Starts
+'''
+
+# Initialize GPIO pins, Gridfeeding timer, and initial battery bank readings
+initialize()
 
 # Main Loop #
 while RUNNING:
     time.sleep(0.5)
 
-    BATTERY_SOC = modbus.get_Average_SOC()
-    BATTERY_SOH = modbus.get_Average_SOH()
-    ACTUAL_BATTERY_CURRENT = modbus.get_Battery_Current()
+    combinedBankReadings = modbus.get_Bank_Readings()
+    errorMessage = modbus.generate_Error_Message()
 
-    print("SOC: {}".format(BATTERY_SOC))
-    print("SOH: {}".format(BATTERY_SOH))
-    print("PV: {}".format(modbus.PREVIOUS_VALS))
-    print("GF: {}".format(modbus.IS_GRID_FEEDING))
-    print("Battery Current: {}".format(ACTUAL_BATTERY_CURRENT))
+    print("SOC: {}".format(combinedBankReadings["SOC"]))
+    print("SOH: {}".format(combinedBankReadings["SOH"]))
+    print("Battery Current: {}".format(combinedBankReadings["Current"]))
+    print("Battery Current Limit: {}".format(combinedBankReadings["Current_Limit"]))
+    print("Gridfeeding History: {}".format(modbus.PREVIOUS_VALS))
+    print("Is Gridfeeding? {}".format(modbus.IS_GRID_FEEDING))
+    print("Errors: \n")
+    print(errorMessage)
 
+    print("--------------------------------------")
+    print("Determining State...")
+    print("--------------------------------------")
     _, IS_GRIDFEEDING = get_State_Variables()
-    NEXT_STATE = determine_Next_State(BATTERY_SOC)
+    NEXT_STATE = determine_Next_State(combinedBankReadings["SOC"])
     CURRENT_STATE = change_State(CURRENT_STATE, NEXT_STATE)
-
     print("--------------------------------------")
