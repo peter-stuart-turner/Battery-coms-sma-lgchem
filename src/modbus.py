@@ -67,9 +67,9 @@ def get_Bank_Readings():
         bValues = check_Bank_Existing_Values("B")
         if aValues and bValues:
             return combine_Bank_Readings(BANK_A_VALUES, BANK_B_VALUES)
-        else if aValues and not bValues:
+        elif aValues and not bValues:
             return combine_Bank_Readings(BANK_A_VALUES, BANK_A_VALUES)
-        else if bValues and not aValues:
+        elif bValues and not aValues:
             return combine_Bank_Readings(BANK_B_VALUES, BANK_B_VALUES)
         else:
             print("No Battery Banks Connected, or there are errors for both")
@@ -111,7 +111,7 @@ def check_Bank_Existing_Values(bank):
         else:
             return False
 def combine_Bank_Readings(bankA, bankB):
-    current =       ctypes.c_int(bankA["Current"]) + ctypes.c_int(bankB["Current"]) / 2
+    current =       (bankA["Current"] + bankB["Current"]) / 2
     current_Lmit =  ceiling(bankA["Current_Limit"] + bankB["Current_Limit"] / 2 * 0.6 * 10)
     soc =           ceiling((bankA["SOC"] + bankA["SOC"])/2 /10)
     soh =           ceiling((bankA["SOH"] + bankA["SOH"])/2 /10)
@@ -129,6 +129,7 @@ def get_Bank_A_Readings():
     global BANK_A_EXCEPTION
     try:
         battery_current_A = BATTERY_BANK_A.read_register(40007)
+	print("A Current", battery_current_A)
         chrge_Cur_Lim_A = BATTERY_BANK_A.read_register(40018)
         socA = BATTERY_BANK_A.read_register(40008)
         sohA = BATTERY_BANK_A.read_register(40009)
@@ -140,6 +141,7 @@ def get_Bank_A_Readings():
             }
         return True
     except Exception as e:
+	print("A exception", e)
         BANK_A_EXCEPTION = e
         return False
 # Retrieves all relevant battery settings for B, returns false on error
@@ -159,6 +161,7 @@ def get_Bank_B_Readings():
             }
         return True
     except Exception as e:
+	print("B Exception", e)
         BANK_B_EXCEPTION = e
         return False
 # Rounds up to the the ceiling #
